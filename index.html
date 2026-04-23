@@ -1,1 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduTrack Pro — Student Management System</title>
+  <!-- Google Fonts & External Stylesheet -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<!-- ════════════════════════════════════════ LOGIN PAGE ════════════════════════════════════════ -->
+<div id="login-page">
+  <div class="login-bg"></div>
+  <div class="login-dots"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">E</div>
+      <div class="login-title">EduTrack Pro</div>
+      <div class="login-sub">Student Management System</div>
+    </div>
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="setRole('admin',this)">Admin</button>
+      <button class="role-tab" onclick="setRole('teacher',this)">Teacher</button>
+      <button class="role-tab" onclick="setRole('student',this)">Student</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username / Email</label>
+      <input class="form-input" type="text" id="login-user" placeholder="Enter your username" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <input class="form-input" type="password" id="login-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+        <span class="input-icon" onclick="togglePw()">👁</span>
+      </div>
+    </div>
+    <div class="login-error" id="login-err">Invalid credentials. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-hint">
+      <b>Demo Credentials</b>
+      <div class="cred-row"><span>Admin:</span><span><b>admin</b> / <b>admin123</b></span></div>
+      <div class="cred-row"><span>Teacher:</span><span><b>teacher</b> / <b>teach123</b></span></div>
+      <div class="cred-row"><span>Student:</span><span><b>student</b> / <b>stu123</b></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ APP ════════════════════════════════════════ -->
+<div id="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-row">
+      <div class="s-logo-icon">E</div>
+      <div><div class="s-logo-text">EduTrack</div><div class="s-logo-sub">Management System</div></div>
+    </div>
+  </div>
+  <nav id="main-nav"></nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av" id="user-av-text">AD</div>
+      <div><div class="user-name" id="user-display-name">Admin</div><div class="user-role-lbl" id="user-display-role">Administrator</div></div>
+      <button class="logout-btn" onclick="logout()" title="Logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="page-title" id="page-title">Dashboard</div>
+        <div class="breadcrumb" id="breadcrumb">Overview</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" type="text" placeholder="Search students, classes..." id="top-search" oninput="window.onSearch(this.value)">
+      </div>
+      <div class="notif-btn" onclick="window.showToast('No new notifications','var(--text3)')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="topbar-btn btn-primary" id="main-cta" onclick="window.handleCTA()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="main-cta-text">Add Student</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="view" id="view-dashboard">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="quick-actions" id="quick-actions"></div>
+      <div class="grid3">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <div><div class="card-title">Recent Enrollments</div><div class="card-sub">Latest 5 students</div></div>
+              <button class="topbar-btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="window.gotoView('students')">View All</button>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Grade</th><th>Status</th></tr></thead><tbody id="dash-recent"></tbody></table></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Class Performance</div></div>
+            <div class="chart-container"><div class="bar-chart" id="dash-chart"></div></div>
+            <div class="chart-x" id="dash-chart-x"></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Subject Averages</div></div>
+            <div style="padding:14px 20px 20px;" id="dash-subjects"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Today's Notices</div></div>
+            <div id="dash-notices" style="padding:4px 0 8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS ── -->
+    <div class="view" id="view-students">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">All Students</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px" id="stu-count-lbl">Loading...</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select id="fl-class" onchange="window.filterStudents()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+            <option value="">All Classes</option>
+          </select>
+          <select id="fl-status" onchange="window.filterStudents()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+            <option value="">All Status</option>
+            <option>Active</option><option>At Risk</option><option>Inactive</option>
+          </select>
+          <select id="fl-sort" onchange="window.filterStudents()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+            <option value="name">Sort: Name</option>
+            <option value="grade">Sort: Grade</option>
+            <option value="attendance">Sort: Attendance</option>
+            <option value="class">Sort: Class</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="marks-table">
+            <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Roll</th><th>Attendance</th><th>Avg Grade</th><th>Status</th><th>Fees</th><th>Actions</th></tr></thead>
+            <tbody id="stu-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD / EDIT STUDENT ── -->
+    <div class="view" id="view-addstudent">
+      <div style="max-width:700px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:20px" id="add-form-title">Enroll New Student</div>
+        <div class="card">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="window.switchFormTab('personal',this)">Personal Info</button>
+            <button class="tab-btn" onclick="window.switchFormTab('academic',this)">Academic Info</button>
+            <button class="tab-btn" onclick="window.switchFormTab('parent',this)">Parent / Guardian</button>
+          </div>
+          <div class="tab-pane active" id="fp-personal">
+            <div class="form-section">
+              <div class="form-row"><div class="fg"><label>First Name *</label><input type="text" id="f-fname" placeholder="e.g. Aarav"></div><div class="fg"><label>Last Name *</label><input type="text" id="f-lname" placeholder="e.g. Sharma"></div></div>
+              <div class="form-row"><div class="fg"><label>Date of Birth *</label><input type="date" id="f-dob"></div><div class="fg"><label>Gender</label><select id="f-gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div></div>
+              <div class="form-row"><div class="fg"><label>Email Address *</label><input type="email" id="f-email" placeholder="student@example.com"></div><div class="fg"><label>Phone Number</label><input type="text" id="f-phone" placeholder="+91 XXXXXXXXXX"></div></div>
+              <div class="form-row full"><div class="fg"><label>Home Address</label><textarea id="f-address" placeholder="Full residential address"></textarea></div></div>
+            </div>
+          </div>
+          <div class="tab-pane" id="fp-academic">
+            <div class="form-section">
+              <div class="form-row"><div class="fg"><label>Class / Section *</label><select id="f-class"><option value="">Select class</option><option>10-A</option><option>10-B</option><option>11-A</option><option>11-B</option><option>12-A</option><option>12-B</option></select></div><div class="fg"><label>Roll Number *</label><input type="text" id="f-roll" placeholder="e.g. 101"></div></div>
+              <div class="form-row"><div class="fg"><label>Admission Date</label><input type="date" id="f-admit"></div><div class="fg"><label>Status</label><select id="f-status"><option>Active</option><option>Inactive</option><option>At Risk</option></select></div></div>
+              <div class="form-row three"><div class="fg"><label>Previous School</label><input type="text" id="f-prevschool" placeholder="School name"></div><div class="fg"><label>Blood Group</label><select id="f-blood"><option value="">Unknown</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div><div class="fg"><label>Fee Category</label><select id="f-feeCat"><option>Regular</option><option>Scholarship</option><option>Staff Ward</option></select></div></div>
+              <div class="form-row full"><div class="fg"><label>Medical Notes</label><textarea id="f-medical" placeholder="Any medical conditions or allergies..."></textarea></div></div>
+            </div>
+          </div>
+          <div class="tab-pane" id="fp-parent">
+            <div class="form-section">
+              <div class="form-row"><div class="fg"><label>Father's Name</label><input type="text" id="f-father" placeholder="Father's full name"></div><div class="fg"><label>Mother's Name</label><input type="text" id="f-mother" placeholder="Mother's full name"></div></div>
+              <div class="form-row"><div class="fg"><label>Guardian Name</label><input type="text" id="f-guardian" placeholder="If different from parents"></div><div class="fg"><label>Relation</label><select id="f-relation"><option>Father</option><option>Mother</option><option>Guardian</option><option>Uncle</option><option>Aunt</option></select></div></div>
+              <div class="form-row"><div class="fg"><label>Primary Contact *</label><input type="text" id="f-pcontact" placeholder="+91 XXXXXXXXXX"></div><div class="fg"><label>Alternate Contact</label><input type="text" id="f-acontact" placeholder="+91 XXXXXXXXXX"></div></div>
+              <div class="form-row full"><div class="fg"><label>Parent Email</label><input type="email" id="f-pemail" placeholder="parent@example.com"></div></div>
+              <div class="form-row"><div class="fg"><label>Occupation (Father)</label><input type="text" id="f-focc" placeholder="e.g. Engineer"></div><div class="fg"><label>Occupation (Mother)</label><input type="text" id="f-mocc" placeholder="e.g. Teacher"></div></div>
+            </div>
+          </div>
+          <div class="required-note">* Required fields</div>
+          <div class="form-footer">
+            <button class="topbar-btn btn-ghost" onclick="window.clearEnrollForm()">Clear Form</button>
+            <button class="topbar-btn btn-primary" onclick="window.submitStudent()" id="submit-student-btn">Enroll Student</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GRADES ── -->
+    <div class="view" id="view-grades">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Grades & Reports</div>
+        <div style="display:flex;gap:8px;">
+          <select id="grade-class-filter" onchange="window.renderGrades()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+            <option value="">All Classes</option>
+          </select>
+          <button class="topbar-btn btn-ghost" onclick="window.openMarksEntry()">Enter Marks</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="window.switchTab('grade','report',this)">Report Cards</button>
+          <button class="tab-btn" onclick="window.switchTab('grade','subjects',this)">Subject Analysis</button>
+          <button class="tab-btn" onclick="window.switchTab('grade','toppers',this)">Top Performers</button>
+        </div>
+        <div class="tab-pane active" id="grade-report">
+          <div class="table-wrap"><table>
+            <thead><tr><th>Rank</th><th>Student</th><th>Class</th><th>Math</th><th>Science</th><th>English</th><th>History</th><th>CS</th><th>Avg %</th><th>Grade</th><th></th></tr></thead>
+            <tbody id="grade-table"></tbody>
+          </table></div>
+        </div>
+        <div class="tab-pane" id="grade-subjects">
+          <div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="subject-cards"></div>
+        </div>
+        <div class="tab-pane" id="grade-toppers">
+          <div style="padding:20px;" id="toppers-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ATTENDANCE ── -->
+    <div class="view" id="view-attendance">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Attendance Tracker</div>
+        <div style="display:flex;gap:8px;">
+          <select id="att-class-sel" onchange="window.renderAttendance()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;"><option value="">All Classes</option></select>
+          <button class="topbar-btn btn-primary" onclick="window.openMarkAttendance()">Mark Today</button>
+        </div>
+      </div>
+      <div class="grid2" style="margin-bottom:16px;">
+        <div class="card"><div class="card-header"><div class="card-title">April 2025 — Calendar View</div><div class="cal-legend"><div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Present</div><div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Late</div><div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Absent</div><div class="leg-item"><div class="leg-dot" style="background:var(--purple)"></div>Holiday</div></div></div><div id="att-calendar"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">Monthly Summary</div></div><div style="padding:16px 20px;" id="att-summary"></div></div>
+      </div>
+      <div class="card"><div class="card-header"><div class="card-title">Student Attendance Records</div></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Present</th><th>Late</th><th>Absent</th><th>Holidays</th><th>%</th><th>Status</th></tr></thead><tbody id="att-table"></tbody></table></div></div>
+    </div>
+
+    <!-- ── FEES ── -->
+    <div class="view" id="view-fees">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:18px">Fee Management</div>
+      <div class="fee-status-bar" id="fee-kpis"></div>
+      <div class="card">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="window.switchTab('fee','collection',this)">Fee Collection</button>
+          <button class="tab-btn" onclick="window.switchTab('fee','pending',this)">Pending Dues</button>
+          <button class="tab-btn" onclick="window.switchTab('fee','history',this)">Payment History</button>
+        </div>
+        <div class="tab-pane active" id="fee-collection"><div class="table-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Annual Fee</th><th>Paid</th><th>Balance</th><th>Last Payment</th><th>Status</th><th>Action</th></tr></thead><tbody id="fee-table"></tbody></table></div></div>
+        <div class="tab-pane" id="fee-pending"><div style="padding:20px;" id="fee-pending-list"></div></div>
+        <div class="tab-pane" id="fee-history"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Student</th><th>Amount</th><th>Mode</th><th>Receipt No.</th><th>Collected By</th></tr></thead><tbody id="fee-history-table"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULE ── -->
+    <div class="view" id="view-schedule">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Class Schedule</div>
+        <select id="sch-class-sel" onchange="window.renderSchedule()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+          <option>10-A</option><option>10-B</option><option>11-A</option><option>11-B</option><option>12-A</option>
+        </select>
+      </div>
+      <div class="card"><div id="schedule-grid"></div></div>
+    </div>
+
+    <!-- ── NOTICES ── -->
+    <div class="view" id="view-notices">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">Notice Board</div>
+        <button class="topbar-btn btn-primary" onclick="window.openNoticeModal()">Post Notice</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;" id="notices-container"></div>
+    </div>
+
+    <!-- ── PROFILE ── -->
+    <div class="view" id="view-profile">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:18px">My Profile</div>
+      <div class="grid2">
+        <div class="card"><div class="card-header"><div class="card-title">Profile Information</div></div><div style="padding:20px;"><div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;"><div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;" id="profile-av">AD</div><div><div style="font-size:18px;font-weight:600;" id="profile-name">Admin User</div><div style="font-size:13px;color:var(--text2);" id="profile-role">System Administrator</div><div style="margin-top:6px"><span class="badge b-blue" id="profile-badge">Admin</span></div></div></div><div class="form-row"><div class="fg"><label>Display Name</label><input type="text" id="pf-name" value="Admin User"></div><div class="fg"><label>Email</label><input type="email" id="pf-email" value="admin@school.edu"></div></div><div class="form-row"><div class="fg"><label>Phone</label><input type="text" id="pf-phone" value="+91 9876543210"></div><div class="fg"><label>Department</label><input type="text" id="pf-dept" value="Administration"></div></div><div class="form-footer" style="padding:0;margin-top:16px;border-top:none;"><button class="topbar-btn btn-primary" onclick="window.saveProfile()">Save Changes</button></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">Change Password</div></div><div style="padding:20px;"><div class="fg" style="margin-bottom:14px;"><label>Current Password</label><input type="password" id="pw-curr" placeholder="••••••••"></div><div class="fg" style="margin-bottom:14px;"><label>New Password</label><input type="password" id="pw-new" placeholder="••••••••"></div><div class="fg" style="margin-bottom:20px;"><label>Confirm Password</label><input type="password" id="pw-conf" placeholder="••••••••"></div><button class="topbar-btn btn-primary" onclick="window.changePassword()" style="width:100%;">Update Password</button></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ════ MODALS ════ -->
+<div class="overlay" id="edit-modal"><div class="modal"><div class="modal-hdr"><div class="modal-title">Edit Student</div><button class="close-btn" onclick="window.closeModal('edit-modal')">✕</button></div><div class="form-section"><input type="hidden" id="edit-id"><div class="form-row"><div class="fg"><label>First Name</label><input type="text" id="edit-fname"></div><div class="fg"><label>Last Name</label><input type="text" id="edit-lname"></div></div><div class="form-row"><div class="fg"><label>Email</label><input type="email" id="edit-email"></div><div class="fg"><label>Phone</label><input type="text" id="edit-phone"></div></div><div class="form-row"><div class="fg"><label>Class</label><select id="edit-class"><option>10-A</option><option>10-B</option><option>11-A</option><option>11-B</option><option>12-A</option><option>12-B</option></select></div><div class="fg"><label>Roll No</label><input type="text" id="edit-roll"></div></div><div class="form-row"><div class="fg"><label>Status</label><select id="edit-status"><option>Active</option><option>At Risk</option><option>Inactive</option></select></div><div class="fg"><label>Blood Group</label><select id="edit-blood"><option value="">Unknown</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div></div><div class="form-row full"><div class="fg"><label>Address</label><textarea id="edit-address"></textarea></div></div></div><div class="form-footer"><button class="topbar-btn btn-ghost" onclick="window.closeModal('edit-modal')">Cancel</button><button class="topbar-btn btn-primary" onclick="window.saveEdit()">Save Changes</button></div></div></div>
+<div class="overlay" id="report-modal"><div class="modal wide"><div class="modal-hdr"><div class="modal-title">Student Report Card</div><div style="display:flex;gap:8px;"><button class="topbar-btn btn-ghost" onclick="window.print()" style="font-size:12px;padding:6px 12px;">🖨 Print</button><button class="close-btn" onclick="window.closeModal('report-modal')">✕</button></div></div><div style="padding:20px;" id="report-content"></div></div></div>
+<div class="overlay" id="att-modal"><div class="modal wide"><div class="modal-hdr"><div class="modal-title">Mark Today's Attendance</div><button class="close-btn" onclick="window.closeModal('att-modal')">✕</button></div><div style="padding:16px 20px;"><div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;"><div class="fg" style="flex:1"><label>Class</label><select id="att-mark-class" onchange="window.loadAttClass()"><option>10-A</option><option>10-B</option><option>11-A</option><option>11-B</option><option>12-A</option></select></div><div class="fg"><label>Date</label><input type="date" id="att-date" style="width:160px;"></div><div style="margin-top:18px;display:flex;gap:6px;"><button class="topbar-btn btn-ghost" style="font-size:12px" onclick="window.markAll('Present')">All Present</button><button class="topbar-btn btn-ghost" style="font-size:12px" onclick="window.markAll('Absent')">All Absent</button></div></div><div id="att-mark-list"></div></div><div class="form-footer"><button class="topbar-btn btn-ghost" onclick="window.closeModal('att-modal')">Cancel</button><button class="topbar-btn btn-primary" onclick="window.saveAttendance()">Save Attendance</button></div></div></div>
+<div class="overlay" id="marks-modal"><div class="modal wide"><div class="modal-hdr"><div class="modal-title">Enter / Update Marks</div><button class="close-btn" onclick="window.closeModal('marks-modal')">✕</button></div><div style="padding:16px 20px;"><div style="display:flex;gap:10px;margin-bottom:16px;"><div class="fg" style="flex:1"><label>Class</label><select id="marks-class" onchange="window.loadMarksTable()"><option>10-A</option><option>10-B</option><option>11-A</option><option>11-B</option><option>12-A</option></select></div><div class="fg"><label>Term</label><select id="marks-term" style="width:120px;"><option>Term 1</option><option>Term 2</option><option>Final</option></select></div></div><div class="table-wrap marks-table"><table><thead><tr><th>Student</th><th>Math /100</th><th>Science /100</th><th>English /100</th><th>History /100</th><th>CS /100</th><th>Avg</th></tr></thead><tbody id="marks-table-body"></tbody></table></div></div><div class="form-footer"><button class="topbar-btn btn-ghost" onclick="window.closeModal('marks-modal')">Cancel</button><button class="topbar-btn btn-primary" onclick="window.saveMarks()">Update Marks</button></div></div></div>
+<div class="overlay" id="fee-modal"><div class="modal"><div class="modal-hdr"><div class="modal-title" id="fee-modal-title">Collect Fee</div><button class="close-btn" onclick="window.closeModal('fee-modal')">✕</button></div><div class="form-section"><input type="hidden" id="fee-student-id"><div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;" id="fee-student-info"></div><div class="form-row"><div class="fg"><label>Amount *</label><input type="number" id="fee-amount" placeholder="₹ Amount"></div><div class
